@@ -1,0 +1,106 @@
+syntax = "proto3";
+
+package order;
+
+option java_multiple_files = true;
+option java_package = "com.example.grpc.order";
+option java_outer_classname = "OrderServiceProto";
+
+service OrderService {
+  // Unary RPC: 단일 주문 생성
+  rpc CreateOrder(CreateOrderRequest) returns (OrderResponse);
+  
+  // Unary RPC: 주문 상세 조회
+  rpc GetOrder(GetOrderRequest) returns (OrderResponse);
+  
+  // Server Streaming RPC: 실시간 주문 상태 추적
+  rpc TrackOrder(TrackOrderRequest) returns (stream OrderStatusUpdate);
+  
+  // Client Streaming RPC: 대량 주문 일괄 처리
+  rpc BatchCreateOrders(stream CreateOrderRequest) returns (BatchOrderResponse);
+  
+  // Bidirectional Streaming RPC: 실시간 주문 처리 및 피드백
+  rpc ProcessOrders(stream OrderProcessRequest) returns (stream OrderProcessResponse);
+}
+
+message CreateOrderRequest {
+  string customer_id = 1;
+  repeated OrderItem items = 2;
+  string shipping_address = 3;
+  PaymentInfo payment_info = 4;
+}
+
+message OrderItem {
+  string product_id = 1;
+  string product_name = 2;
+  int32 quantity = 3;
+  double unit_price = 4;
+}
+
+message PaymentInfo {
+  string payment_method = 1;
+  string card_number = 2;
+  string cvv = 3;
+}
+
+message OrderResponse {
+  string order_id = 1;
+  OrderStatus status = 2;
+  double total_amount = 3;
+  int64 created_at = 4;
+  string message = 5;
+}
+
+message GetOrderRequest {
+  string order_id = 1;
+}
+
+message TrackOrderRequest {
+  string order_id = 1;
+}
+
+message OrderStatusUpdate {
+  string order_id = 1;
+  OrderStatus status = 2;
+  string location = 3;
+  int64 timestamp = 4;
+  string description = 5;
+}
+
+message BatchOrderResponse {
+  int32 total_orders = 1;
+  int32 successful_orders = 2;
+  int32 failed_orders = 3;
+  repeated string order_ids = 4;
+}
+
+message OrderProcessRequest {
+  string order_id = 1;
+  ProcessAction action = 2;
+  string notes = 3;
+}
+
+message OrderProcessResponse {
+  string order_id = 1;
+  bool success = 2;
+  string message = 3;
+  OrderStatus new_status = 4;
+}
+
+enum OrderStatus {
+  PENDING = 0;
+  CONFIRMED = 1;
+  PROCESSING = 2;
+  SHIPPED = 3;
+  DELIVERED = 4;
+  CANCELLED = 5;
+  REFUNDED = 6;
+}
+
+enum ProcessAction {
+  CONFIRM = 0;
+  SHIP = 1;
+  DELIVER = 2;
+  CANCEL = 3;
+  REFUND = 4;
+}
