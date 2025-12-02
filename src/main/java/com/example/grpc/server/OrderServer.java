@@ -17,7 +17,7 @@ public class OrderServer {
     private OrderServiceImpl orderService;
     
     /**
-     * gRPC 서버를 시작하고 인터셉터를 등록
+     * gRPC 서버를 시작하고 인터셉터를 등록합니다
      */
     public void start() throws IOException {
         orderService = new OrderServiceImpl();
@@ -29,21 +29,21 @@ public class OrderServer {
             .build()
             .start();
         
-        logger.info("Server started, listening on " + PORT);
+        logger.info("서버가 시작되었습니다. 포트: " + PORT);
         
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            System.err.println("Shutting down gRPC server since JVM is shutting down");
+            System.err.println("JVM이 종료되면서 gRPC 서버를 종료합니다");
             try {
                 OrderServer.this.stop();
             } catch (InterruptedException e) {
                 e.printStackTrace(System.err);
             }
-            System.err.println("Server shut down");
+            System.err.println("서버가 종료되었습니다");
         }));
     }
     
     /**
-     * gRPC 서버를 정상적으로 종료
+     * gRPC 서버를 정상적으로 종료합니다
      */
     public void stop() throws InterruptedException {
         if (server != null) {
@@ -55,7 +55,7 @@ public class OrderServer {
     }
     
     /**
-     * 서버가 종료될 때까지 대기
+     * 서버가 종료될 때까지 대기합니다
      */
     public void blockUntilShutdown() throws InterruptedException {
         if (server != null) {
@@ -64,7 +64,7 @@ public class OrderServer {
     }
     
     /**
-     * 메인 메서드: 서버를 시작하고 실행 상태를 유지
+     * 메인 메서드: 서버를 시작하고 실행 상태를 유지합니다
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         final OrderServer server = new OrderServer();
