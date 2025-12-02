@@ -20,7 +20,7 @@ public class OrderClient {
     private final OrderServiceGrpc.OrderServiceStub asyncStub;
     
     /**
-     * gRPC 채널과 스텁을 초기화하고 인증 헤더를 추가
+     * gRPC 채널과 스텁을 초기화하고 인증 헤더를 추가합니다
      */
     public OrderClient(String host, int port) {
         this.channel = ManagedChannelBuilder.forAddress(host, port)
@@ -38,50 +38,50 @@ public class OrderClient {
     }
     
     /**
-     * 채널을 종료하고 리소스를 정리
+     * 채널을 종료하고 리소스를 정리합니다
      */
     public void shutdown() throws InterruptedException {
         channel.shutdown().awaitTermination(5, TimeUnit.SECONDS);
     }
     
     /**
-     * Unary RPC 예제: 단일 주문 생성
+     * Unary RPC 예제: 단일 주문을 생성합니다
      */
     public void createOrder() {
-        logger.info("Creating order...");
+        logger.info("주문 생성 중...");
         
         CreateOrderRequest request = CreateOrderRequest.newBuilder()
             .setCustomerId("customer-001")
             .addItems(OrderItem.newBuilder()
                 .setProductId("prod-001")
-                .setProductName("Laptop")
+                .setProductName("노트북")
                 .setQuantity(1)
                 .setUnitPrice(1299.99)
                 .build())
             .addItems(OrderItem.newBuilder()
                 .setProductId("prod-002")
-                .setProductName("Mouse")
+                .setProductName("마우스")
                 .setQuantity(2)
                 .setUnitPrice(29.99)
                 .build())
-            .setShippingAddress("123 Main St, Seoul, Korea")
+            .setShippingAddress("서울시 강남구 테헤란로 123")
             .setPaymentInfo(PaymentInfo.newBuilder()
-                .setPaymentMethod("Credit Card")
+                .setPaymentMethod("신용카드")
                 .setCardNumber("****-****-****-1234")
                 .setCvv("***")
                 .build())
             .build();
         
         OrderResponse response = blockingStub.createOrder(request);
-        logger.info("Order created: " + response.getOrderId() + 
-                    ", Total: $" + response.getTotalAmount());
+        logger.info("주문 생성 완료: " + response.getOrderId() + 
+                    ", 총액: $" + response.getTotalAmount());
     }
     
     /**
-     * Server Streaming RPC 예제: 주문 상태 실시간 추적
+     * Server Streaming RPC 예제: 주문 상태를 실시간으로 추적합니다
      */
     public void trackOrder(String orderId) throws InterruptedException {
-        logger.info("Tracking order: " + orderId);
+        logger.info("주문 추적 중: " + orderId);
         
         TrackOrderRequest request = TrackOrderRequest.newBuilder()
             .setOrderId(orderId)
@@ -92,7 +92,7 @@ public class OrderClient {
         asyncStub.trackOrder(request, new StreamObserver<OrderStatusUpdate>() {
             @Override
             public void onNext(OrderStatusUpdate update) {
-                logger.info(String.format("Status update: %s - %s at %s",
+                logger.info(String.format("상태 업데이트: %s - %s (%s)",
                     update.getStatus(),
                     update.getDescription(),
                     update.getLocation()));
@@ -100,13 +100,13 @@ public class OrderClient {
             
             @Override
             public void onError(Throwable t) {
-                logger.severe("Error tracking order: " + t.getMessage());
+                logger.severe("주문 추적 중 오류 발생: " + t.getMessage());
                 latch.countDown();
             }
             
             @Override
             public void onCompleted() {
-                logger.info("Order tracking completed");
+                logger.info("주문 추적 완료");
                 latch.countDown();
             }
         });
@@ -115,17 +115,17 @@ public class OrderClient {
     }
     
     /**
-     * Client Streaming RPC 예제: 여러 주문을 일괄 생성
+     * Client Streaming RPC 예제: 여러 주문을 일괄로 생성합니다
      */
     public void batchCreateOrders(int count) throws InterruptedException {
-        logger.info("Batch creating " + count + " orders...");
+        logger.info(count + "개의 주문을 일괄 생성 중...");
         
         CountDownLatch latch = new CountDownLatch(1);
         
         StreamObserver<BatchOrderResponse> responseObserver = new StreamObserver<BatchOrderResponse>() {
             @Override
             public void onNext(BatchOrderResponse response) {
-                logger.info(String.format("Batch result: %d total, %d success, %d failed",
+                logger.info(String.format("일괄 처리 결과: 총 %d건, 성공 %d건, 실패 %d건",
                     response.getTotalOrders(),
                     response.getSuccessfulOrders(),
                     response.getFailedOrders()));
@@ -133,13 +133,13 @@ public class OrderClient {
             
             @Override
             public void onError(Throwable t) {
-                logger.severe("Error in batch creation: " + t.getMessage());
+                logger.severe("일괄 생성 중 오류 발생: " + t.getMessage());
                 latch.countDown();
             }
             
             @Override
             public void onCompleted() {
-                logger.info("Batch order creation completed");
+                logger.info("일괄 주문 생성 완료");
                 latch.countDown();
             }
         };
@@ -152,13 +152,13 @@ public class OrderClient {
                     .setCustomerId("customer-" + (i + 1))
                     .addItems(OrderItem.newBuilder()
                         .setProductId("prod-" + (i + 1))
-                        .setProductName("Product " + (i + 1))
+                        .setProductName("제품 " + (i + 1))
                         .setQuantity(1)
                         .setUnitPrice(100.0 + i * 10)
                         .build())
-                    .setShippingAddress("Address " + (i + 1))
+                    .setShippingAddress("주소 " + (i + 1))
                     .setPaymentInfo(PaymentInfo.newBuilder()
-                        .setPaymentMethod("Credit Card")
+                        .setPaymentMethod("신용카드")
                         .build())
                     .build();
                 
@@ -175,17 +175,17 @@ public class OrderClient {
     }
     
     /**
-     * Bidirectional Streaming RPC 예제: 실시간 주문 처리
+     * Bidirectional Streaming RPC 예제: 실시간으로 주문을 처리합니다
      */
     public void processOrders(List<String> orderIds) throws InterruptedException {
-        logger.info("Processing orders in real-time...");
+        logger.info("실시간 주문 처리 중...");
         
         CountDownLatch latch = new CountDownLatch(1);
         
         StreamObserver<OrderProcessResponse> responseObserver = new StreamObserver<OrderProcessResponse>() {
             @Override
             public void onNext(OrderProcessResponse response) {
-                logger.info(String.format("Process result: Order %s - %s (Status: %s)",
+                logger.info(String.format("처리 결과: 주문 %s - %s (상태: %s)",
                     response.getOrderId(),
                     response.getMessage(),
                     response.getNewStatus()));
@@ -193,13 +193,13 @@ public class OrderClient {
             
             @Override
             public void onError(Throwable t) {
-                logger.severe("Error in order processing: " + t.getMessage());
+                logger.severe("주문 처리 중 오류 발생: " + t.getMessage());
                 latch.countDown();
             }
             
             @Override
             public void onCompleted() {
-                logger.info("Order processing stream completed");
+                logger.info("주문 처리 스트림 완료");
                 latch.countDown();
             }
         };
@@ -213,7 +213,7 @@ public class OrderClient {
                 OrderProcessRequest request = OrderProcessRequest.newBuilder()
                     .setOrderId(orderIds.get(i))
                     .setAction(actions[i % actions.length])
-                    .setNotes("Processing order " + (i + 1))
+                    .setNotes("주문 처리 " + (i + 1))
                     .build();
                 
                 requestObserver.onNext(request);
@@ -229,7 +229,7 @@ public class OrderClient {
     }
     
     /**
-     * 메인 메서드: 모든 RPC 패턴을 순차적으로 테스트
+     * 메인 메서드: 모든 RPC 패턴을 순차적으로 테스트합니다
      */
     public static void main(String[] args) throws Exception {
         OrderClient client = new OrderClient("localhost", 9090);
